@@ -289,6 +289,28 @@ code{font-family:var(--mono)}
   .sidebar{transition:margin-left .22s cubic-bezier(.4,0,.2,1)}
   html.sb-collapsed .sidebar{margin-left:calc(-1 * var(--sb-w))}
 }
+
+/* ---------- 正文宽度切换（标宽 / 全宽 / 纸张） ---------- */
+.w-switch{display:flex;align-items:center;gap:2px;flex:0 0 auto;margin-left:10px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:9px;padding:2px}
+.w-switch button{appearance:none;border:0;background:transparent;color:var(--fg-mute);
+  font-size:12px;line-height:1;padding:5px 10px;border-radius:7px;cursor:pointer;
+  font-family:var(--sans);white-space:nowrap;transition:background .12s,color .12s}
+.w-switch button:hover{color:var(--fg)}
+.w-switch button.on{background:var(--panel);color:var(--gold-deep);font-weight:600;
+  box-shadow:0 1px 3px rgba(14,27,51,.12)}
+@media(max-width:960px){.w-switch{display:none}}
+
+/* 全宽：正文紧贴左右两侧，隐藏右侧目录并收起侧边栏，适合大屏/直播展示 */
+html[data-wmode="full"] .content{max-width:none;padding:8px 16px 64px}
+html[data-wmode="full"] .toc{display:none}
+html[data-wmode="full"] .topbar{width:100%}
+@media(min-width:1181px){
+  html[data-wmode="full"] .hero{padding-left:0;padding-right:0}
+}
+/* 纸张：窄版文档阅读宽度 */
+html[data-wmode="paper"] .content{max-width:740px}
+
 @media(prefers-reduced-motion:reduce){
   .sidebar{transition:none}
 }

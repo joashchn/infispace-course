@@ -47,6 +47,59 @@
   if (mask) mask.addEventListener('click', closeSb);
   if (sbClose) sbClose.addEventListener('click', closeSb);
 
+  /* ---- 正文宽度切换：标宽(默认) / 全宽 / 纸张 ---- */
+  var topbarEl = document.querySelector('.topbar');
+  var prevSbState = null;
+  if (topbarEl && !document.getElementById('wSwitch')) {
+    var wWrap = document.createElement('div');
+    wWrap.id = 'wSwitch';
+    wWrap.className = 'w-switch';
+    wWrap.setAttribute('role', 'group');
+    wWrap.setAttribute('aria-label', '正文宽度');
+    [['standard','标宽'],['full','全宽'],['paper','纸张']].forEach(function(m){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.dataset.w = m[0];
+      b.textContent = m[1];
+      b.title = m[0] === 'full' ? '正文占满全宽（隐藏目录、收起导航），适合大屏展示' :
+                m[0] === 'paper' ? '窄版纸张式阅读宽度' : '标准阅读宽度（默认）';
+      wWrap.appendChild(b);
+    });
+    topbarEl.appendChild(wWrap);
+  }
+  function setWMode(m){
+    var cur = root.getAttribute('data-wmode') || 'standard';
+    if (m === cur) { syncWMode(); return; }
+    if (m === 'full' && cur !== 'full') {
+      prevSbState = root.classList.contains('sb-collapsed');
+      setCollapsed(true); // 全宽先收起侧边栏，真正占满屏幕
+    } else if (cur === 'full' && m !== 'full' && prevSbState === false) {
+      setCollapsed(false); // 退出全宽时按进入前的状态恢复
+    }
+    if (m === 'standard') root.removeAttribute('data-wmode');
+    else root.setAttribute('data-wmode', m);
+    try { localStorage.setItem('aidoc-w', m); } catch(err){}
+    syncWMode();
+    window.dispatchEvent(new Event('resize'));
+  }
+  function syncWMode(){
+    var cur = root.getAttribute('data-wmode') || 'standard';
+    Array.prototype.forEach.call(document.querySelectorAll('#wSwitch button'), function(b){
+      var on = (b.dataset.w === cur);
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  var wSwitch = document.getElementById('wSwitch');
+  if (wSwitch) {
+    wSwitch.addEventListener('click', function(e){
+      var b = e.target.closest ? e.target.closest('button') : null;
+      if (!b) return;
+      setWMode(b.dataset.w);
+    });
+    syncWMode(); // 页面头部的内联脚本已在渲染前恢复过模式，这里同步高亮
+  }
+
   /* 分组展开：默认展开当前模块，记住用户手动切换 */
   var nav = document.querySelector('.sb-nav');
   if (nav) {
