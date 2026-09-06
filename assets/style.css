@@ -38,9 +38,9 @@ code{font-family:var(--mono)}
 .brand-text i{font-style:normal;font-size:11px;color:var(--fg-mute)}
 .sb-close{display:none;background:none;border:0;color:var(--fg-mute);font-size:16px;cursor:pointer}
 .sb-collapse{display:none;background:none;border:1px solid var(--line);border-radius:7px;
-  width:26px;height:26px;flex:0 0 auto;color:var(--fg-mute);font-size:13px;line-height:1;
+  width:28px;height:28px;flex:0 0 auto;color:var(--fg-soft);font-size:14px;line-height:1;
   cursor:pointer;transition:background .12s,color .12s,border-color .12s}
-.sb-collapse:hover{background:var(--line-soft);color:var(--gold-deep);border-color:var(--gold)}
+.sb-collapse:hover{background:var(--gold-soft);color:var(--gold-deep);border-color:var(--gold)}
 
 .sb-search{position:relative;padding:12px 14px;border-bottom:1px solid var(--line-soft)}
 .sb-search input{width:100%;padding:8px 11px;border-radius:9px;border:1px solid var(--line);
@@ -284,9 +284,10 @@ code{font-family:var(--mono)}
 /* ---------- 侧边栏折叠（仅桌面端） ---------- */
 @media(min-width:961px){
   .sb-collapse{display:block}
+  /* 桌面端顶栏 ☰ 常驻显示，作为折叠/展开的切换键 */
+  .menu-btn{display:block}
   .sidebar{transition:margin-left .22s cubic-bezier(.4,0,.2,1)}
   html.sb-collapsed .sidebar{margin-left:calc(-1 * var(--sb-w))}
-  html.sb-collapsed .menu-btn{display:block}
 }
 @media(prefers-reduced-motion:reduce){
   .sidebar{transition:none}
