@@ -10,7 +10,40 @@
   var sbClose = document.getElementById('sbClose');
   function openSb(){ sidebar.classList.add('on'); mask.classList.add('on'); }
   function closeSb(){ sidebar.classList.remove('on'); mask.classList.remove('on'); }
-  if (menuBtn) menuBtn.addEventListener('click', openSb);
+  /* 桌面端折叠：宽度 >960px 时点击 ☰ 是折叠/展开，移动端才是抽屉 */
+  var mqDesktop = window.matchMedia('(min-width: 961px)');
+  var collapseBtn = null;
+  if (sidebar) {
+    var sbHead = sidebar.querySelector('.sb-head');
+    if (sbHead) {
+      collapseBtn = document.createElement('button');
+      collapseBtn.type = 'button';
+      collapseBtn.id = 'sbCollapse';
+      collapseBtn.className = 'sb-collapse';
+      collapseBtn.setAttribute('aria-label', '收起目录');
+      collapseBtn.setAttribute('aria-expanded', 'true');
+      collapseBtn.title = '收起目录（Ctrl + \\）';
+      collapseBtn.textContent = '\u00AB';
+      sbHead.appendChild(collapseBtn);
+    }
+  }
+  function setCollapsed(v){
+    root.classList.toggle('sb-collapsed', !!v);
+    if (collapseBtn) {
+      collapseBtn.textContent = v ? '\u00BB' : '\u00AB';
+      collapseBtn.setAttribute('aria-label', v ? '展开目录' : '收起目录');
+      collapseBtn.setAttribute('aria-expanded', v ? 'false' : 'true');
+      collapseBtn.title = (v ? '展开目录' : '收起目录') + '（Ctrl + \\）';
+    }
+    try { localStorage.setItem('aidoc-sb', v ? '1' : '0'); } catch(err){}
+    // 折叠/展开后重算阅读进度与目录高亮
+    window.dispatchEvent(new Event('resize'));
+  }
+  if (collapseBtn) collapseBtn.addEventListener('click', function(){ setCollapsed(true); });
+  if (menuBtn) menuBtn.addEventListener('click', function(){
+    if (mqDesktop.matches) setCollapsed(!root.classList.contains('sb-collapsed'));
+    else openSb();
+  });
   if (mask) mask.addEventListener('click', closeSb);
   if (sbClose) sbClose.addEventListener('click', closeSb);
 
@@ -233,6 +266,14 @@
   }
 
   document.addEventListener('keydown', function(e){
+    /* Ctrl/Cmd + \ 折叠或展开侧边栏 */
+    if ((e.ctrlKey || e.metaKey) && (e.key === '\\' || e.key === '|')) {
+      e.preventDefault();
+      if (mqDesktop.matches) setCollapsed(!root.classList.contains('sb-collapsed'));
+      else if (sidebar.classList.contains('on')) closeSb();
+      else openSb();
+      return;
+    }
     if (e.key === '/' && document.activeElement !== input &&
         !/input|textarea|select/i.test(document.activeElement.tagName)) {
       e.preventDefault();
