@@ -186,13 +186,21 @@
     } catch(e) {}
   }
   if (mermaidNodes.length) {
-    if (!window.mermaid) {
-      var s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js';
-      s.onload = function(){ renderMermaid(false); };
-      document.head.appendChild(s);
-    } else {
+    if (window.mermaid) {
       renderMermaid(false);
+    } else {
+      // 优先加载本地副本（离线 / file:// 双击打开也能渲染图表），失败才回退 CDN
+      var mbase = document.querySelector('script[src*="app.js"]').getAttribute('src').replace(/app\.js\?v=.*$/, '');
+      var s = document.createElement('script');
+      s.src = mbase + 'mermaid.min.js';
+      s.onload = function(){ renderMermaid(false); };
+      s.onerror = function(){
+        var c = document.createElement('script');
+        c.src = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js';
+        c.onload = function(){ renderMermaid(false); };
+        document.head.appendChild(c);
+      };
+      document.head.appendChild(s);
     }
   }
 
@@ -236,9 +244,21 @@
     if (loading) { return; }
     loading = true;
     var base = document.querySelector('script[src*="app.js"]').getAttribute('src').replace(/app\.js\?v=.*$/, '');
-    fetch(base + 'search-index.json').then(function(r){ return r.json(); })
-      .then(function(d){ INDEX = d; loading = false; cb(d); })
-      .catch(function(){ loading = false; cb([]); });
+    // 离线优先：本地 search-index.js（file:// 下 fetch 会被浏览器拦掉），失败再走原来的 JSON
+    if (window.__AIDOC_INDEX) { INDEX = window.__AIDOC_INDEX; loading = false; cb(INDEX); return; }
+    var js = document.createElement('script');
+    js.src = base + 'search-index.js';
+    js.onload = function(){
+      INDEX = window.__AIDOC_INDEX || [];
+      loading = false;
+      cb(INDEX);
+    };
+    js.onerror = function(){
+      fetch(base + 'search-index.json').then(function(r){ return r.json(); })
+        .then(function(d){ INDEX = d; loading = false; cb(d); })
+        .catch(function(){ loading = false; cb([]); });
+    };
+    document.head.appendChild(js);
   }
 
   function snippet(text, q){
