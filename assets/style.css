@@ -107,6 +107,8 @@ code{font-family:var(--mono)}
   padding:10px 40px;background:color-mix(in srgb,var(--bg) 88%,transparent);
   backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line-soft);
   width:calc(100% + var(--toc-w))}
+/* 右侧没有目录列（.toc）的页面，顶栏不能再补这 --toc-w，否则整页横向溢出 236px（首页就是这种情况） */
+body:not(:has(.toc)) .topbar{width:100%}
 .menu-btn{display:none;background:none;border:0;font-size:17px;color:var(--fg-soft);cursor:pointer}
 .crumbs{flex:1;font-size:13px;color:var(--fg-mute);display:flex;gap:7px;align-items:center;
   min-width:0;overflow:hidden;white-space:nowrap}
@@ -261,6 +263,9 @@ code{font-family:var(--mono)}
 .var-item span{font-size:13.5px;color:var(--fg-soft);line-height:1.8}
 
 .tips{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:14px}
+/* 四张卡固定 2×2：窄栏里 auto-fill 会排成 3+1，读起来断行，直播照着念不顺手 */
+.tips.tips-2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:720px){.tips.tips-2{grid-template-columns:1fr}}
 .tip{border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;background:var(--bg-soft)}
 .tip b{display:block;font-size:14px;font-weight:640;margin-bottom:5px}
 .tip span{font-size:13px;color:var(--fg-soft);line-height:1.75}
